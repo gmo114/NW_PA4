@@ -37,14 +37,9 @@ class Firewall(object):
         self.connection.send(msg)  # Drops the packet since no output action is given
 
         # Rule four
+        # Handles all the IPv6 that aren't being used
         msg = of.ofp_flow_mod()
-        msg.match.dl_type = 0x86DD  # IPv6 protocol type
-        # Match on any protocol, type, src, and dest of IPv6 protocol
-        msg.match.wildcards |= of.OFPFW_DL_TYPE
-        msg.match.wildcards |= of.OFPFW_NW_PROTO
-        msg.match.wildcards |= of.OFPFW_NW_SRC_ALL
-        msg.match.wildcards |= of.OFPFW_NW_DST_ALL
-        self.connection.send(msg)  # drops
+        self.connection.send(msg)  # drops packets
 
     def _handle_PacketIn(self, event):
         """
