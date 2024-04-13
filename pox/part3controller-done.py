@@ -44,42 +44,49 @@ class Part3Controller (object):
   def s1_setup(self):
     #put switch 1 rules here
     msg = of.ofp_flow_mod()
+    msg.priority = 0xFFFF
     msg.actions.append(of.ofp_action_output(port=of.OFPP_FLOOD))  # Sends packets on all ports but the input port
     self.connection.send(msg)  # accept
 
   def s2_setup(self):
     # put switch 2 rules here
     msg = of.ofp_flow_mod()
+    msg.priority = 0xFFFF
     msg.actions.append(of.ofp_action_output(port=of.OFPP_FLOOD))  # Sends packets on all ports but the input port
     self.connection.send(msg)  # accept
 
   def s3_setup(self):
     # put switch 3 rules here
     msg = of.ofp_flow_mod()
+    msg.priority = 0xFFFF
     msg.actions.append(of.ofp_action_output(port=of.OFPP_FLOOD))  # Sends packets on all ports but the input port
     self.connection.send(msg)  # accept
 
   def cores21_setup(self):
 
     msg = of.ofp_flow_mod()
+    msg.priority = 0xFFFF
     msg.match.dl_type = 0x0806  # ARP protocol
     msg.match.nw_src = IPS.get("hnotrust")[0]
     msg.match.nw_dst = IPS.get("serv1")[0]
     self.connection.send(msg)  # accept
 
     msg = of.ofp_flow_mod()
+    msg.priority = 0xFFFF
     msg.match.dl_type = 0x0806  # ARP protocol
     msg.match.nw_src = IPS.get("serv1")[0]
     msg.match.nw_dst = IPS.get("hnotrust")[0]
     self.connection.send(msg)  # accept
 
     msg = of.ofp_flow_mod()
+    msg.priority = 0xFFFF
     msg.match.dl_type = 0x0800  # if ip ( ipv4 )
     msg.match.nw_src = IPS.get("hnotrust")[0]
     msg.match.nw_proto = 1  # IP Protocol  ( icmp )
     self.connection.send(msg)  # reject
 
     msg = of.ofp_flow_mod()
+    msg.priority = 0xFFFF
     msg.match.dl_type = 0x0800  # if ip ( ipv4 )
     msg.match.nw_dst = IPS.get("hnotrust")[0]
     msg.match.nw_proto = 1  # IP Protocol  ( icmp )
@@ -96,6 +103,7 @@ class Part3Controller (object):
         src = ["h10", "h20", "h30", "serv1"]
         for info in ip_to_port:
             msg = of.ofp_flow_mod()
+            msg.priority = 0xFFFF
             msg.match.dl_type = 0x0806  # ARP protocol
             msg.match.nw_src = IPS.get(src[src_num])[0]
             msg.match.nw_dst = info[0]
@@ -103,6 +111,7 @@ class Part3Controller (object):
             self.connection.send(msg)  # accept
 
             msg = of.ofp_flow_mod()
+            msg.priority = 0xFFFF
             msg.match.dl_type = 0x0800  # if ip ( ipv4 )
             msg.match.nw_src = IPS.get(src[src_num])[0]
             msg.match.nw_dst = info[0]
@@ -111,6 +120,7 @@ class Part3Controller (object):
             self.connection.send(msg)  # accept
 
             msg = of.ofp_flow_mod()
+            msg.priority = 0xFFFF
             msg.match.dl_type = 0x0800  # if ip ( ipv4 )
             msg.match.nw_src = IPS.get(src[src_num])[0]
             msg.match.nw_dst = info[0]
@@ -119,6 +129,7 @@ class Part3Controller (object):
 
         if src[src_num] != "serv1":
             msg = of.ofp_flow_mod()
+            msg.priority = 0xFFFF
             msg.match.dl_type = 0x0806  # ARP protocol
             msg.match.nw_src = IPS.get("hnotrust")[0]
             msg.match.nw_dst = IPS.get(src[src_num])[0]
@@ -132,6 +143,15 @@ class Part3Controller (object):
             self.connection.send(msg)  # accept
 
             msg = of.ofp_flow_mod()
+            msg.priority = 0xFFFF
+            msg.match.dl_type = 0x0800  # if ip ( ipv4 )
+            msg.match.nw_src = IPS.get(src[src_num])[0]
+            msg.match.nw_dst = IPS.get(src[src_num])[0]
+            msg.actions.append(of.ofp_action_output(port=port_send))  # Sends packets on all ports but the input port
+            self.connection.send(msg)  # accept
+
+            msg = of.ofp_flow_mod()
+            msg.priority = 0xFFFF
             msg.match.dl_type = 0x0806  # ARP protocol
             msg.match.nw_src = IPS.get(src[src_num])[0]
             msg.match.nw_dst = IPS.get("hnotrust")[0]
@@ -146,6 +166,7 @@ class Part3Controller (object):
   def dcs31_setup(self):
     # put datacenter switch rules here
     msg = of.ofp_flow_mod()
+    msg.priority = 0xFFFF
     msg.actions.append(of.ofp_action_output(port=of.OFPP_FLOOD))  # Sends packets on all ports but the input port
     self.connection.send(msg)  # accept
 
