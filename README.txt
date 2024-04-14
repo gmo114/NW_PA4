@@ -15,6 +15,14 @@ INSTALL:
     Note for Pox Controller: You will need to install python 2.7 for the Pox Controller to work
                              -> sudo apt install python2.7
 
+Useful Commands:
+    ->sudo lsof -i :(port number)
+    Finds the pid of the process using that given port number.
+    -> sudo kill (pid)
+    Kills the process of that pid
+    ->sudo mn -c
+    Restarts the mininet env in case of an error.
+
 HOW TO USE TASK 1 - Custom Network Topology:
     A custom network topology that works as star topology.
     To run task 1 get in the same directory as part1.py and run with the following command
@@ -26,6 +34,8 @@ HOW TO USE TASK 1 - Custom Network Topology:
     Shows the connections between each host
     -> iperf
     Will show the TCP bandwidth between host
+    -> exit
+    Ends mininet
 
 HOW TO USE TASK 2 - Simple Firewall:
     Simple firewall that will stop certain packets and allow other ones
@@ -45,6 +55,8 @@ HOW TO USE TASK 2 - Simple Firewall:
     Shows the connections between each host
     -> iperf
     Will show the TCP bandwidth between host
+    -> exit
+    Ends mininet
 
 HOW TO USE TASK 3 - Network Firewall:
     The set-up is the same as task 2 but this involves more flow rules and more host.
@@ -64,3 +76,5 @@ HOW TO USE TASK 3 - Network Firewall:
     Shows the connections between each host
     -> iperf
     Will show the TCP bandwidth between host
+    -> exit
+    Ends mininet
