@@ -64,20 +64,15 @@ class Part3Controller (object):
 
   def cores21_setup(self):
 
+    # Drops packets that come from hnotrust via arp protocol to server
     msg = of.ofp_flow_mod()
     msg.priority = 0xFFFF
     msg.match.dl_type = 0x0806  # ARP protocol
-    msg.match.nw_src = IPS.get("hnotrust")[0]
-    msg.match.nw_dst = IPS.get("serv1")[0]
-    self.connection.send(msg)  # accept
+    msg.match.nw_src = IPS.get("hnotrust")[0]  # Checks for hnotrust host
+    msg.match.nw_dst = IPS.get("serv1")[0]  # Checks to see if deset is server
+    self.connection.send(msg)  # drop
 
-    msg = of.ofp_flow_mod()
-    msg.priority = 0xFFFF
-    msg.match.dl_type = 0x0806  # ARP protocol
-    msg.match.nw_src = IPS.get("serv1")[0]
-    msg.match.nw_dst = IPS.get("hnotrust")[0]
-    self.connection.send(msg)  # accept
-
+    # Drops all ICMP packets from hnotrust host
     msg = of.ofp_flow_mod()
     msg.priority = 0xFFFF
     msg.match.dl_type = 0x0800  # if ip ( ipv4 )
@@ -85,23 +80,21 @@ class Part3Controller (object):
     msg.match.nw_proto = 1  # IP Protocol  ( icmp )
     self.connection.send(msg)  # reject
 
-    msg = of.ofp_flow_mod()
-    msg.priority = 0xFFFF
-    msg.match.dl_type = 0x0800  # if ip ( ipv4 )
-    msg.match.nw_dst = IPS.get("hnotrust")[0]
-    msg.match.nw_proto = 1  # IP Protocol  ( icmp )
-    self.connection.send(msg)  # reject
-
-    ip_to_port1 = [(IPS.get("h20")[0], 2), (IPS.get("h30")[0], 3), (IPS.get("serv1")[0], 4)]
-    ip_to_port2 = [(IPS.get("h10")[0], 1), (IPS.get("h30")[0], 3), (IPS.get("serv1")[0], 4)]
-    ip_to_port3 = [(IPS.get("h10")[0], 1), (IPS.get("h20")[0], 2), (IPS.get("serv1")[0], 4)]
-    ip_to_port4 = [(IPS.get("h10")[0], 1), (IPS.get("h20")[0], 2), (IPS.get("h30")[0], 3)]
+    # Used to make all the rules needed with the ports of the dest host
+    ip_to_port1 = [(IPS.get("h20")[0], 2), (IPS.get("h30")[0], 3), (IPS.get("serv1")[0], 4)] # Connections for host1
+    ip_to_port2 = [(IPS.get("h10")[0], 1), (IPS.get("h30")[0], 3), (IPS.get("serv1")[0], 4)] # Connections for host2
+    ip_to_port3 = [(IPS.get("h10")[0], 1), (IPS.get("h20")[0], 2), (IPS.get("serv1")[0], 4)] # Connections for host3
+    ip_to_port4 = [(IPS.get("h10")[0], 1), (IPS.get("h20")[0], 2), (IPS.get("h30")[0], 3)] # Connections for server
+    # Takes each list from above and puts it into a larger list
     all_ip_to_port = [ip_to_port1, ip_to_port2, ip_to_port3, ip_to_port4]
     src_num = 0
-    port_send = 0
+    # Runs through all the connections for the different host
     for ip_to_port in all_ip_to_port:
+        # Used to get all the info from the IP table above
         src = ["h10", "h20", "h30", "serv1"]
+        # Runs through each of the connections for host to make rules.
         for info in ip_to_port:
+            # Makes the ARP connections from current host to dest host and gives port for arp
             msg = of.ofp_flow_mod()
             msg.priority = 0xFFFF
             msg.match.dl_type = 0x0806  # ARP protocol
@@ -110,6 +103,7 @@ class Part3Controller (object):
             msg.actions.append(of.ofp_action_output(port=info[1]))  # Sends packets on all ports but the input port
             self.connection.send(msg)  # accept
 
+            # Makes the ARP connections from current host to dest host and gives port for icmp
             msg = of.ofp_flow_mod()
             msg.priority = 0xFFFF
             msg.match.dl_type = 0x0800  # if ip ( ipv4 )
@@ -119,6 +113,7 @@ class Part3Controller (object):
             msg.actions.append(of.ofp_action_output(port=info[1]))  # Sends packets on all ports but the input port
             self.connection.send(msg)  # accept
 
+            # Makes the ARP connections from current host to dest host and gives port for normal IPv4
             msg = of.ofp_flow_mod()
             msg.priority = 0xFFFF
             msg.match.dl_type = 0x0800  # if ip ( ipv4 )
@@ -127,7 +122,9 @@ class Part3Controller (object):
             msg.actions.append(of.ofp_action_output(port=info[1]))  # Sends packets on all ports but the input port
             self.connection.send(msg)  # accept
 
+        # handles the connection between the host and untrusted host checks that is not server
         if src[src_num] != "serv1":
+            # Makes the ARP connections from not trusted to current host
             msg = of.ofp_flow_mod()
             msg.priority = 0xFFFF
             msg.match.dl_type = 0x0806  # ARP protocol
@@ -142,14 +139,7 @@ class Part3Controller (object):
             msg.actions.append(of.ofp_action_output(port=port_send))
             self.connection.send(msg)  # accept
 
-            msg = of.ofp_flow_mod()
-            msg.priority = 0xFFFF
-            msg.match.dl_type = 0x0800  # if ip ( ipv4 )
-            msg.match.nw_src = IPS.get(src[src_num])[0]
-            msg.match.nw_dst = IPS.get(src[src_num])[0]
-            msg.actions.append(of.ofp_action_output(port=port_send))  # Sends packets on all ports but the input port
-            self.connection.send(msg)  # accept
-
+            # makes the arp connection from current host to not trusted host
             msg = of.ofp_flow_mod()
             msg.priority = 0xFFFF
             msg.match.dl_type = 0x0806  # ARP protocol
@@ -159,7 +149,7 @@ class Part3Controller (object):
             self.connection.send(msg)  # accept
 
         src_num = src_num + 1
-
+    # drops the IPv6 messages which are not needed
     msg = of.ofp_flow_mod()
     self.connection.send(msg)  # drops
 
